@@ -69,14 +69,47 @@ Function Definitions
 **********************************************************************************************************************/
 
 void BeginningScreen(int cycles){
-  u8 askMessage[] = "Do you want to play the game";
-  u8 yesMessage[] = "yes";
-  u8 noMessage[] = "no";
+  u8 askMessage[] = "Press any button to play";
 
   LcdCommand(LCD_CLEAR_CMD);
-  LcdMessage(LINE1_START_ADDR, askMessage+cycles);
-  LcdMessage(LINE2_START_ADDR, yesMessage);
-  LcdMessage(LINE2_END_ADDR-strlen(noMessage)+1,noMessage);
+  LcdMessage(LINE1_START_ADDR, askMessage+(cycles%(strlen(askMessage))));
+}
+
+void PassedScreen(void){
+  u8 PassedMessage[] = "Level Passed, you move on to the next round";
+  
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR,PassedMessage);
+}
+
+void FailedScreen(void){
+  u8 FailedMessage[] = "You Failed this round";
+
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR, FailedMessage);
+}
+
+int WasAnyButtonPressed(void){
+  if(WasButtonPressed(BUTTON0)){
+    ButtonAcknowledge(BUTTON0);
+    return 1;
+  }
+
+  if(WasButtonPressed(BUTTON1)){
+    ButtonAcknowledge(BUTTON1);
+    return 1;
+  }
+
+  if(WasButtonPressed(BUTTON2)){
+    ButtonAcknowledge(BUTTON2);
+    return 1;
+  }
+
+  if(WasButtonPressed(BUTTON3)){
+    ButtonAcknowledge(BUTTON3);
+    return 1;
+  }
+
 }
 /*--------------------------------------------------------------------------------------------------------------------*/
 /*! @publicsection */                                                                                            
@@ -156,32 +189,43 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
   
-  static u16 cycle=0;
-  static u16 round=0;
-  static bool Beginning = TRUE;
-  static bool InGame = FALSE;
-  static bool END = FALSE;
+  static u16 cycle=0, round=0;
+  static bool Beginning = TRUE, RoundPassed = TRUE, RoundFinished = FALSE, InGame = FALSE, END = FALSE;
 
   static u16 counter = U16_COUNTER_PERIOD_MS;
+
   if (counter==0){
+
+    counter=U16_COUNTER_PERIOD_MS;
 
     if(Beginning){                          //Beginning screen 
       BeginningScreen(cycle);
       cycle++;
-      
-      if(cycle==20)
-        cycle=0;
     }
-    counter=U16_COUNTER_PERIOD_MS;
 
-    if(WasButtonPressed(BUTTON0)){          //User wants to play move to in_game
-      ButtonAcknowledge(BUTTON0);
+    if(WasAnyButtonPressed()){          //User wants to play move to the main game
       Beginning = FALSE;
       InGame = TRUE;
+      LcdCommand(LCD_CLEAR_CMD);
     }
 
     if (InGame){
       //code for what will happen in game
+      if(RoundFinished){
+        //Code for the user has finished a round
+        if(RoundPassed){
+          PassedScreen();
+          round++;
+        }
+
+        else{
+          FailedScreen();
+        }
+      }
+
+      else{
+        //Code for what happens when the user is still in the round
+      }
 
     }
     
