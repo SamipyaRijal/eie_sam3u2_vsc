@@ -44,8 +44,9 @@ Global variable definitions with scope across entire project.
 All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
-volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */static u8 UserApp1Name[] = "Button Location";
-u8 SOS[] = {1,1,1,1,0,0,0,0,1,1,1,1};
+volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
+static u8 UserApp1Name[] = "Button Location";
+static u16 correctColours[30];                             // This will be the correct order of colours for the user to guess
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -67,27 +68,15 @@ static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state 
 Function Definitions
 **********************************************************************************************************************/
 
-void light_button(void){
-  if(WasButtonPressed(BUTTON0)){
-    ButtonAcknowledge(BUTTON0);
-    LedToggle(BLUE);
-  }
+void BeginningScreen(int cycles){
+  u8 askMessage[] = "Do you want to play the game";
+  u8 yesMessage[] = "yes";
+  u8 noMessage[] = "no";
 
-  if(WasButtonPressed(BUTTON1)){
-    ButtonAcknowledge(BUTTON1);
-    LedToggle(GREEN);
-  }
-
-  if(WasButtonPressed(BUTTON2)){
-    ButtonAcknowledge(BUTTON2);
-    LedToggle(YELLOW);
-  }
-
-  if(WasButtonPressed(BUTTON3)){
-    ButtonAcknowledge(BUTTON3);
-    LedToggle(RED);
-  }
-
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR, askMessage+cycles);
+  LcdMessage(LINE2_START_ADDR, yesMessage);
+  LcdMessage(LINE2_END_ADDR-strlen(noMessage)+1,noMessage);
 }
 /*--------------------------------------------------------------------------------------------------------------------*/
 /*! @publicsection */                                                                                            
@@ -119,12 +108,6 @@ void UserApp1Initialize(void)
   {
     UserApp1_pfStateMachine = UserApp1SM_Idle;
     HEARTBEAT_OFF();
-    LcdCommand(LCD_CLEAR_CMD);
-    LcdMessage(LINE1_START_ADDR,UserApp1Name);
-    LcdMessage(LINE2_START_ADDR, "0");
-    LcdMessage(LINE2_START_ADDR+6,"1");
-    LcdMessage(LINE2_START_ADDR+13,"2");
-    LcdMessage(LINE2_END_ADDR,"3");
     LedOff(BLUE);
     LedOff(GREEN);
     LedOff(RED);
@@ -172,19 +155,37 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+  
+  static u16 cycle=0;
+  static u16 round=0;
+  static bool Beginning = TRUE;
+  static bool InGame = FALSE;
+  static bool END = FALSE;
+
   static u16 counter = U16_COUNTER_PERIOD_MS;
-  static int letter = 0;
-  if(counter==0){
-    if(SOS[letter]==1)
-      LedOn(RED);
+  if (counter==0){
+
+    if(Beginning){                          //Beginning screen 
+      BeginningScreen(cycle);
+      cycle++;
+      
+      if(cycle==20)
+        cycle=0;
+    }
+    counter=U16_COUNTER_PERIOD_MS;
+
+    if(WasButtonPressed(BUTTON0)){          //User wants to play move to in_game
+      ButtonAcknowledge(BUTTON0);
+      Beginning = FALSE;
+      InGame = TRUE;
+    }
+
+    if (InGame){
+      //code for what will happen in game
+
+    }
     
-    else if(SOS[letter]==0)
-      LedBlink(RED, LED_1HZ);
-    
-    letter++;
-    if(letter==12)
-      letter=0;
-    counter = U16_COUNTER_PERIOD_MS;
+
   }
   counter--;
 } 
