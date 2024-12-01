@@ -111,6 +111,15 @@ int WasAnyButtonPressed(void){
   }
 
 }
+
+bool CheckArrayMatched(u16 arr1[], u16 arr2[], int numCheck){
+  for(int i; i<numCheck;i++){
+    if(arr1[i]!=arr2[i])
+      return FALSE;
+  
+  return TRUE;
+  }
+}
 /*--------------------------------------------------------------------------------------------------------------------*/
 /*! @publicsection */                                                                                            
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -201,18 +210,21 @@ static void UserApp1SM_Idle(void)
     if(Beginning){                          //Beginning screen 
       BeginningScreen(cycle);
       cycle++;
-    }
+    
 
-    if(WasAnyButtonPressed()){          //User wants to play move to the main game
-      Beginning = FALSE;
-      InGame = TRUE;
-      LcdCommand(LCD_CLEAR_CMD);
+      if(WasAnyButtonPressed()){          //User wants to play move to the main game
+        Beginning = FALSE;
+        InGame = TRUE;
+        LcdCommand(LCD_CLEAR_CMD);
+      }
     }
 
     if (InGame){
       //code for what will happen in game
       if(RoundFinished){
         //Code for the user has finished a round
+        RoundPassed = CheckArrayMatched(correctColours,GuessedColours, round);
+
         if(RoundPassed){
           PassedScreen();
           round++;
