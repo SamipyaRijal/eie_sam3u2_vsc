@@ -46,7 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
 static u8 UserApp1Name[] = "Button Location";
-static u16 correctColours[30];                             // This will be the correct order of colours for the user to guess
+static u16 correctColours[ARRAY_SIZE];                             // This will be the correct order of colours for the user to guess
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -191,7 +191,7 @@ static void UserApp1SM_Idle(void)
   
   static u16 cycle=0, round=0;
   static bool Beginning = TRUE, RoundPassed = TRUE, RoundFinished = FALSE, InGame = FALSE, END = FALSE;
-
+  static u16 GuessedColours[ARRAY_SIZE];
   static u16 counter = U16_COUNTER_PERIOD_MS;
 
   if (counter==0){
