@@ -136,31 +136,33 @@ void ShowColour(u16 arr[],u16 round, u16 cycle){
     }
 }
 
-void CheckInput(u16 arr[],u16 *roundNumber){
-  if(*roundNumber>MAX_ROUND)
-    return;
+void CheckInput(u16 arr[],u16 *InputNum){
 
   if(WasButtonPressed(BUTTON0)){
     ButtonAcknowledge(BUTTON0);
-    arr[*roundNumber]=0;
+    arr[*InputNum]=0;
+    *InputNum++;
     return;
   }
 
   if(WasButtonPressed(BUTTON1)){
     ButtonAcknowledge(BUTTON1);
-    arr[*roundNumber]=1;
+    arr[*InputNum]=1;
+    *InputNum++;
     return;
   }
 
   if(WasButtonPressed(BUTTON2)){
     ButtonAcknowledge(BUTTON2);
-    arr[*roundNumber]=2;
+    arr[*InputNum]=2;
+    *InputNum++;
     return;
   }
 
   if(WasButtonPressed(BUTTON3)){
     ButtonAcknowledge(BUTTON3);
-    arr[*roundNumber]=3;
+    arr[*InputNum]=3;
+    *InputNum++;
     return;  
   }
 }
