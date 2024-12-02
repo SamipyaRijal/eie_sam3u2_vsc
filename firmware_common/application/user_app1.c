@@ -46,7 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
 static u8 UserApp1Name[] = "Button Location";
-static u16 correctColours[MAX_ROUND];                             // This will be the correct order of colours for the user to guess
+static u16 correctColours[MAX_ROUND] = {1,2,3,2,1};                             // This will be the correct order of colours for the user to guess
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -110,6 +110,30 @@ int WasAnyButtonPressed(void){
     return 1;
   }
 
+}
+
+void ShowColour(u16 arr[],u16 round, u16 cycle){
+    if(cycle>=round)
+      return;
+    
+    switch (arr[round])
+    {
+    case 0:
+      LedOn(BLUE);
+      break;
+    
+    case 1:
+      LedOn(RED);
+      break;
+    
+    case 2:
+      LedOn(GREEN);
+      break;
+
+    case 3:
+      LedOn(YELLOW);
+      break;
+    }
 }
 
 void CheckInput(u16 arr[],u16 *roundNumber){
@@ -229,7 +253,7 @@ static void UserApp1SM_Idle(void)
   
   static u16 cycle=0, round=0, numOfInputs = 0;
   static bool Beginning = TRUE, RoundPassed = TRUE, RoundFinished = FALSE, 
-  InGame = FALSE, END = FALSE, NewRound = TRUE;      
+  InGame = FALSE, END = FALSE, NewRound = TRUE, ColourShown=FALSE;      
   static u16 GuessedColours[MAX_ROUND];
   static u16 counter = U16_COUNTER_PERIOD_MS;
 
@@ -254,6 +278,7 @@ static void UserApp1SM_Idle(void)
       if(NewRound){
         NewRound=FALSE;
         numOfInputs=0;
+        cycle = 0;
       }
 
       if(RoundFinished){
@@ -261,6 +286,7 @@ static void UserApp1SM_Idle(void)
         RoundPassed = CheckArrayMatched(correctColours,GuessedColours, round);
 
         if(RoundPassed){
+          NewRound = TRUE;
           PassedScreen();
           round++;
         }
@@ -268,13 +294,23 @@ static void UserApp1SM_Idle(void)
         else{
           FailedScreen();
         }
+        RoundFinished=FALSE;
       }
 
       else{
         //Code for what happens when the user is still in the round
-        CheckInput(&GuessedColours,&numOfInputs);
-        if(numOfInputs==round)
-          RoundFinished=TRUE;
+        if(!ColourShown){
+          CheckInput(&GuessedColours,&numOfInputs);
+          if(numOfInputs==round)
+            RoundFinished=TRUE;
+        }
+
+        else{
+          ShowColour(correctColours, round, cycle);
+          if(cycle==round)
+            ColourShown=TRUE;
+          cycle++;
+        }
       }
 
     }
