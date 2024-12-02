@@ -57,7 +57,7 @@ Constants / Definitions
 **********************************************************************************************************************/
 
 #define U16_COUNTER_PERIOD_MS 500;
-#define ARRAY_SIZE 30
+#define MAX_ROUND 30
 
 #endif /* __USER_APP1_H */
 

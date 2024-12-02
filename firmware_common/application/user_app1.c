@@ -46,7 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
 static u8 UserApp1Name[] = "Button Location";
-static u16 correctColours[ARRAY_SIZE];                             // This will be the correct order of colours for the user to guess
+static u16 correctColours[MAX_ROUND];                             // This will be the correct order of colours for the user to guess
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -110,6 +110,35 @@ int WasAnyButtonPressed(void){
     return 1;
   }
 
+}
+
+void CheckInput(u16 arr[],u16 *roundNumber){
+  if(*roundNumber>MAX_ROUND)
+    return;
+
+  if(WasButtonPressed(BUTTON0)){
+    ButtonAcknowledge(BUTTON0);
+    arr[*roundNumber]=0;
+    return;
+  }
+
+  if(WasButtonPressed(BUTTON1)){
+    ButtonAcknowledge(BUTTON1);
+    arr[*roundNumber]=1;
+    return;
+  }
+
+  if(WasButtonPressed(BUTTON2)){
+    ButtonAcknowledge(BUTTON2);
+    arr[*roundNumber]=2;
+    return;
+  }
+
+  if(WasButtonPressed(BUTTON3)){
+    ButtonAcknowledge(BUTTON3);
+    arr[*roundNumber]=3;
+    return;  
+  }
 }
 
 bool CheckArrayMatched(u16 arr1[], u16 arr2[], int numCheck){
@@ -198,9 +227,10 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
   
-  static u16 cycle=0, round=0;
-  static bool Beginning = TRUE, RoundPassed = TRUE, RoundFinished = FALSE, InGame = FALSE, END = FALSE;
-  static u16 GuessedColours[ARRAY_SIZE];
+  static u16 cycle=0, round=0, numOfInputs = 0;
+  static bool Beginning = TRUE, RoundPassed = TRUE, RoundFinished = FALSE, 
+  InGame = FALSE, END = FALSE, NewRound = TRUE;      
+  static u16 GuessedColours[MAX_ROUND];
   static u16 counter = U16_COUNTER_PERIOD_MS;
 
   if (counter==0){
@@ -221,6 +251,11 @@ static void UserApp1SM_Idle(void)
 
     if (InGame){
       //code for what will happen in game
+      if(NewRound){
+        NewRound=FALSE;
+        numOfInputs=0;
+      }
+
       if(RoundFinished){
         //Code for the user has finished a round
         RoundPassed = CheckArrayMatched(correctColours,GuessedColours, round);
@@ -237,6 +272,9 @@ static void UserApp1SM_Idle(void)
 
       else{
         //Code for what happens when the user is still in the round
+        CheckInput(&GuessedColours,&numOfInputs);
+        if(numOfInputs==round)
+          RoundFinished=TRUE;
       }
 
     }
