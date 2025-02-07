@@ -45,6 +45,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
+static code[30];
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -66,7 +67,26 @@ static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state 
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
+u8 whichButtonPressed(void){
+  if(WasButtonPressed(BUTTON0)){
+    ButtonAcknowledge(BUTTON0);
+    return 0;
+  }
 
+  if(WasButtonPressed(BUTTON1)){
+    ButtonAcknowledge(BUTTON1);
+    return 1;
+  }
+
+  if(WasButtonPressed(BUTTON2)){
+    ButtonAcknowledge(BUTTON2);
+    return 2;
+  }
+
+  if(WasButtonPressed(BUTTON3))
+    ButtonAcknowledge(BUTTON3);
+    return 3;
+}
 /*--------------------------------------------------------------------------------------------------------------------*/
 /*! @publicsection */                                                                                            
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -103,6 +123,9 @@ void UserApp1Initialize(void)
     LcdMessage(LINE2_START_ADDR+6,"1");
     LcdMessage(LINE2_START_ADDR+13,"2");
     LcdMessage(LINE2_END_ADDR,"3");
+    
+  
+    //Fill code randomly with the digits 0-3
   }
   else
   {
@@ -131,7 +154,35 @@ Promises:
 void UserApp1RunActiveState(void)
 {
   UserApp1_pfStateMachine();
+  code[0] = 1;
+  code[1] = 0;
+  code[2] = 3;
+  
+  static level = 1;
+  int inputCode[30];
+  static bool levelPassed = TRUE;
 
+  int index;
+  if(levelPassed){
+    
+    for(index=0;index<level;index++){
+      LedOn(code[index]);
+    }
+
+    for (index = 0; index < level; index++)
+    {
+      inputCode[index] = whichButtonPressed();
+    }
+    inputCode[level] = 4; //4 is used, so the program know when the array ends
+    level++;
+  }
+  
+  else{
+    LcdCommand(LCD_CLEAR_CMD);
+    LcdMessage(LINE1_START_ADDR, "Incorrect");
+  }
+
+  
 } /* end UserApp1RunActiveState */
 
 
