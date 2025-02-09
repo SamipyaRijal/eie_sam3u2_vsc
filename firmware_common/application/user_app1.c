@@ -38,6 +38,7 @@ PROTECTED FUNCTIONS
 **********************************************************************************************************************/
 
 #include "configuration.h"
+#include  <stdlib.h>
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
@@ -45,7 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
-static code[30];
+static int code[30];
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -87,6 +88,15 @@ u8 whichButtonPressed(void){
     ButtonAcknowledge(BUTTON3);
     return 3;
 }
+
+bool Array_match(int a[], int b[], int n){
+  for (int i=0;i<n;i++)
+    if(a[i]!=b[i])
+      return FALSE;
+
+  return TRUE;
+}
+
 /*--------------------------------------------------------------------------------------------------------------------*/
 /*! @publicsection */                                                                                            
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -126,6 +136,12 @@ void UserApp1Initialize(void)
     
   
     //Fill code randomly with the digits 0-3
+    /*
+    Code currently not working
+    for(int index=0;index<LEVEL-1;index++){
+      code[index] = rand()%4;
+    }
+    */
   }
   else
   {

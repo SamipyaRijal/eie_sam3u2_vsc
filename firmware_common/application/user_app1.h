@@ -56,6 +56,7 @@ static void UserApp1SM_Error(void);
 Constants / Definitions
 **********************************************************************************************************************/
 #define END 4;
+#define MAX_LEVEL 30
 
 #endif /* __USER_APP1_H */
 
