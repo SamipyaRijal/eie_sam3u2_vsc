@@ -136,12 +136,11 @@ void UserApp1Initialize(void)
     
   
     //Fill code randomly with the digits 0-3
-    /*
-    Code currently not working
-    for(int index=0;index<LEVEL-1;index++){
-      code[index] = rand()%4;
+    
+    //Code currently not working
+    for(int index=0;index<MAX_LEVEL-1;index++){
+      code[index] = G_u32SystemTime1ms%4;
     }
-    */
   }
   else
   {
