@@ -46,7 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
-static int code[30] = {0,1,2,3};
+static int code[30] = {0,1,2,3,2,2,3,1,5};
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -182,23 +182,58 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-  static code_displayed = FALSE;
-  static u16 code_index=1;
-  static u8 level = 5;
-  static u16 counter = U16_COUNTER_PERIOD_MS;
+  static bool code_displayed = FALSE;
+  static bool user_finished = FALSE;
+  static bool level_passed = TRUE;
+  static int inputcode[30];
+  static u16 code_index=0;
+  static u16 user_inputs=0;
+  static u16 counter_period = U16_COUNTER_PERIOD_MS;
+  static u8 level = 8;
+  
 
-  if(counter==0){
-    if(!code_displayed){
+  if(counter_period==500){
+    
+    /*
+    if(code_displayed){
+      for(u8 i=0;i<7;i++)
+        LedOff(i);
+    }*/
+    
+    if(code_displayed==FALSE){
       LedOn(code[code_index]);
       LedOff(code[code_index-1]);
       code_index++;
       if(code_index==level)
         code_displayed = TRUE;
+     // counter_period = U16_COUNTER_PERIOD_MS;
     }
   }
-  counter--;
+  
+  if(counter_period==0){
+    for(u8 i=0;i<7;i++){
+      LedOff(i);
+    }
+    counter_period = U16_COUNTER_PERIOD_MS;
+
+    if(code_displayed){
+      inputcode[user_inputs] = whichButtonPressed;
+      user_inputs++;
+      if (user_inputs==level)
+        user_finished = TRUE;
+    }
+
+    if (user_finished){
+      for(int index=0;index<level;index++)
+        if(code[index]!=inputcode[index])
+          level_passed = FALSE;
+      
+      //User passed, set game for next level 
+      level++;
+  }
+  counter_period--;
 } 
- /* end UserApp1SM_Idle() */
+ /* end UserApp1SM_Idle() */l
 
 
 /*------------------------------------------------------------------------------------------------------------------*/
