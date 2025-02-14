@@ -46,7 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
-static int code[30];
+static int code[30] = {0,1,2,3};
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -166,37 +166,7 @@ Promises:
 void UserApp1RunActiveState(void)
 {
   UserApp1_pfStateMachine();
-  code[0] = 1;
-  code[1] = 0;
-  code[2] = 3;
-  
-  static level = 1;
-  static int inputCode[30];
-  static bool levelPassed = TRUE;
 
-  int index;
-  if(levelPassed){
-    
-    /*
-    for(index=0;index<level;index++){
-      LedOn(code[index]);
-    }
-    */
-
-    for (index = 0; index < level; index++)
-    {
-      inputCode[index] = whichButtonPressed();
-    }
-    inputCode[level] = 4; //4 is used, so the program know when the array ends
-    level++;
-  }
-  
-  else{
-    LcdCommand(LCD_CLEAR_CMD);
-    LcdMessage(LINE1_START_ADDR, "Incorrect");
-  }
-
-  
 } /* end UserApp1RunActiveState */
 
 
@@ -212,7 +182,21 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+  static code_displayed = FALSE;
+  static u16 code_index=1;
+  static u8 level = 5;
+  static u16 counter = U16_COUNTER_PERIOD_MS;
 
+  if(counter==0){
+    if(!code_displayed){
+      LedOn(code[code_index]);
+      LedOff(code[code_index-1]);
+      code_index++;
+      if(code_index==level)
+        code_displayed = TRUE;
+    }
+  }
+  counter--;
 } 
  /* end UserApp1SM_Idle() */
 
