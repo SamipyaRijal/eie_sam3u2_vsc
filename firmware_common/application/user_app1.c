@@ -138,9 +138,6 @@ void UserApp1Initialize(void)
     //Fill code randomly with the digits 0-3
     
     //Code currently not working
-    for(int index=0;index<MAX_LEVEL-1;index++){
-      code[index] = G_u32SystemTime1ms%4;
-    }
   }
   else
   {
@@ -174,15 +171,17 @@ void UserApp1RunActiveState(void)
   code[2] = 3;
   
   static level = 1;
-  int inputCode[30];
+  static int inputCode[30];
   static bool levelPassed = TRUE;
 
   int index;
   if(levelPassed){
     
+    /*
     for(index=0;index<level;index++){
       LedOn(code[index]);
     }
+    */
 
     for (index = 0; index < level; index++)
     {
