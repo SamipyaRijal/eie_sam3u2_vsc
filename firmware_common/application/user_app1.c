@@ -180,16 +180,13 @@ State Machine Function Definitions
 **********************************************************************************************************************/
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* What does this state do? */
-static void UserApp1SM_Idle(void)
-{
-  static bool code_displayed = FALSE;
-  static bool user_finished = FALSE;
-  static bool level_passed = TRUE;
+static void UserApp1SM_Idle(void){
   static int inputcode[30];
   static u16 code_index=0;
   static u16 user_inputs=0;
   static u16 counter_period = U16_COUNTER_PERIOD_MS;
   static u8 level = 8;
+  static u8 game_stage = 1;
   
 
   if(counter_period==500){
@@ -200,12 +197,12 @@ static void UserApp1SM_Idle(void)
         LedOff(i);
     }*/
     
-    if(code_displayed==FALSE){
+    if(game_stage==1){
       LedOn(code[code_index]);
       LedOff(code[code_index-1]);
       code_index++;
       if(code_index==level)
-        code_displayed = TRUE;
+        game_stage++;
      // counter_period = U16_COUNTER_PERIOD_MS;
     }
   }
@@ -216,30 +213,30 @@ static void UserApp1SM_Idle(void)
     }
     counter_period = U16_COUNTER_PERIOD_MS;
 
-    if(code_displayed){
+    if(game_stage==2){
       inputcode[user_inputs] = whichButtonPressed;
       user_inputs++;
       if (user_inputs==level)
-        user_finished = TRUE;
+        game_stage++;
     }
 
-    if (user_finished){
+    if (game_stage==3){
       for(int index=0;index<level;index++)
         if(code[index]!=inputcode[index])
-          level_passed = FALSE;
+          game_stage = 5;
       
       //User passed, set game for next level 
       level++;
   }
   counter_period--;
-} 
- /* end UserApp1SM_Idle() */l
+  } 
+}
+ /* end UserApp1SM_Idle() */
 
 
 /*------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
-static void UserApp1SM_Error(void)          
-{
+static void UserApp1SM_Error(void){
   
 } /* end UserApp1SM_Error() */
 /*--------------------------------------------------------------------------------------------------------------------*/
