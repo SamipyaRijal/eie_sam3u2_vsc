@@ -71,21 +71,25 @@ Function Definitions
 u8 whichButtonPressed(void){
   if(WasButtonPressed(BUTTON0)){
     ButtonAcknowledge(BUTTON0);
+    LedOn(0);
     return 0;
   }
 
   if(WasButtonPressed(BUTTON1)){
     ButtonAcknowledge(BUTTON1);
+    LedOn(1);
     return 1;
   }
 
   if(WasButtonPressed(BUTTON2)){
     ButtonAcknowledge(BUTTON2);
+    LedOn(2);
     return 2;
   }
 
   if(WasButtonPressed(BUTTON3))
     ButtonAcknowledge(BUTTON3);
+    LedOn(3);
     return 3;
 }
 
@@ -190,32 +194,62 @@ static void UserApp1SM_Idle(void){
   
 
   if(counter_period==500){
-    
+    for(u8 i=0;i<7;i++){
+      LedOff(i);
+    }
     /*
     if(code_displayed){
       for(u8 i=0;i<7;i++)
         LedOff(i);
     }*/
     
+     // counter_period = U16_COUNTER_PERIOD_MS;
+    
+  }
+  
+  if(counter_period==0){
+
+    counter_period = U16_COUNTER_PERIOD_MS;
+
     if(game_stage==1){
       LedOn(code[code_index]);
       LedOff(code[code_index-1]);
       code_index++;
       if(code_index==level)
         game_stage++;
-     // counter_period = U16_COUNTER_PERIOD_MS;
+        user_inputs = 0;
     }
-  }
-  
-  if(counter_period==0){
-    for(u8 i=0;i<7;i++){
-      LedOff(i);
-    }
-    counter_period = U16_COUNTER_PERIOD_MS;
+    
 
     if(game_stage==2){
-      inputcode[user_inputs] = whichButtonPressed;
-      user_inputs++;
+      if(WasButtonPressed(BUTTON0)){
+        ButtonAcknowledge(BUTTON0);
+        inputcode[user_inputs] = 0;
+        LedOn(0);
+        user_inputs++;
+      }
+
+      else if(WasButtonPressed(BUTTON1)){
+        ButtonAcknowledge(BUTTON1);
+        inputcode[user_inputs] = 1;
+        LedOn(1);
+        user_inputs++;
+      }
+
+      else if(WasButtonPressed(BUTTON2)){
+        ButtonAcknowledge(BUTTON2);
+        inputcode[user_inputs] = 2;
+        LedOn(2);
+        user_inputs++;
+      }
+
+      else if(WasButtonPressed(BUTTON3)){
+        ButtonAcknowledge(BUTTON3);
+        inputcode[user_inputs] = 3;
+        LedOn(3);
+        user_inputs++;
+      }
+
       if (user_inputs==level)
         game_stage++;
     }
@@ -227,9 +261,9 @@ static void UserApp1SM_Idle(void){
       
       //User passed, set game for next level 
       level++;
-  }
-  counter_period--;
+    }
   } 
+  counter_period--;
 }
  /* end UserApp1SM_Idle() */
 
