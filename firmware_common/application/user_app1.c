@@ -225,7 +225,7 @@ static void UserApp1SM_Idle(void)
       else if(WasButtonPressed(BUTTON1)){
         ButtonAcknowledge(BUTTON1);
         game_stage++;
-        PWMAudioOn(BUZZER1);
+        PWMAudioOn(BUZZER1);;
       }
 
       else if(WasButtonPressed(BUTTON2)){
@@ -360,10 +360,6 @@ static void UserApp1SM_Idle(void)
     }
 
     else if(game_stage==6){
-      ButtonAcknowledge(BUTTON0);
-      ButtonAcknowledge(BUTTON1);
-      ButtonAcknowledge(BUTTON2);
-      ButtonAcknowledge(BUTTON3);
       
       PWMAudioOff(BUZZER2);
       display_incorrect(display_index);
@@ -371,24 +367,28 @@ static void UserApp1SM_Idle(void)
 
       if(WasButtonPressed(BUTTON0)){
         ButtonAcknowledge(BUTTON0);
+        PWMAudioOn(BUZZER1);
         game_stage=1;
         level=1;
       }
 
       else if(WasButtonPressed(BUTTON1)){
         ButtonAcknowledge(BUTTON1);
+        PWMAudioOn(BUZZER1);
         game_stage=1;
         level=1;
       }
 
       else if(WasButtonPressed(BUTTON2)){
         ButtonAcknowledge(BUTTON2);
+        PWMAudioOn(BUZZER1);
         game_stage=1;
         level=1;
       }
 
       else if(WasButtonPressed(BUTTON3)){
         ButtonAcknowledge(BUTTON3);
+        PWMAudioOn(BUZZER1);
         game_stage=1;
         level=1;
       }
