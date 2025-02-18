@@ -1,5 +1,5 @@
 /*!*********************************************************************************************************************
-@file user_app1.c                                                                
+@file user_app1.c
 @brief User's tasks / applications are written here.  This description
 should be replaced by something specific to the task.
 
@@ -38,75 +38,88 @@ PROTECTED FUNCTIONS
 **********************************************************************************************************************/
 
 #include "configuration.h"
-#include  <stdlib.h>
+#include <stdlib.h>
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
 All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
-volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
-static int code[30] = {0,1,2,3,2,2,3,1,5};
-
+volatile u32 G_u32UserApp1Flags; /*!< @brief Global state flags */
+static int code[30] = {0, 1, 2, 3, 2, 2, 3, 1, 2};
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
-extern volatile u32 G_u32SystemTime1ms;                   /*!< @brief From main.c */
-extern volatile u32 G_u32SystemTime1s;                    /*!< @brief From main.c */
-extern volatile u32 G_u32SystemFlags;                     /*!< @brief From main.c */
-extern volatile u32 G_u32ApplicationFlags;                /*!< @brief From main.c */
-
+extern volatile u32 G_u32SystemTime1ms;    /*!< @brief From main.c */
+extern volatile u32 G_u32SystemTime1s;     /*!< @brief From main.c */
+extern volatile u32 G_u32SystemFlags;      /*!< @brief From main.c */
+extern volatile u32 G_u32ApplicationFlags; /*!< @brief From main.c */
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_<type>" and be declared as static.
 ***********************************************************************************************************************/
-static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
-//static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
-
+static fnCode_type UserApp1_pfStateMachine; /*!< @brief The state machine function pointer */
+// static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
 
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
-u8 whichButtonPressed(void){
-  if(WasButtonPressed(BUTTON0)){
-    ButtonAcknowledge(BUTTON0);
-    LedOn(0);
-    return 0;
-  }
 
-  if(WasButtonPressed(BUTTON1)){
-    ButtonAcknowledge(BUTTON1);
-    LedOn(1);
-    return 1;
-  }
+void start_message(int index){
+  LcdCommand(LCD_CLEAR_CMD);
+  char message[] = "Press any button to begin playing";
+  if (index==strlen(message))
+    index%=strlen(message);
+  LcdMessage(LINE1_START_ADDR,message+index);
 
-  if(WasButtonPressed(BUTTON2)){
-    ButtonAcknowledge(BUTTON2);
-    LedOn(2);
-    return 2;
-  }
-
-  if(WasButtonPressed(BUTTON3))
-    ButtonAcknowledge(BUTTON3);
-    LedOn(3);
-    return 3;
 }
 
-bool Array_match(int a[], int b[], int n){
-  for (int i=0;i<n;i++)
-    if(a[i]!=b[i])
-      return FALSE;
+void displaying_code(u8 index)
+{
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR, "Displaying code");
+}
 
-  return TRUE;
+void display_button_loc(u8 index){
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR, "BUTTON LOCATIONS");
+  LcdMessage(LINE2_START_ADDR, "0");
+  LcdMessage(LINE2_START_ADDR + 6, "1");
+  LcdMessage(LINE2_START_ADDR + 13, "2");
+  LcdMessage(LINE2_END_ADDR, "3");
+}
+
+void display_passed_level(u8 index, u8 level){
+  char message_1[] = "Congrats you guess correctly";
+  char message_2[] = "Press any button to continue";
+
+  if (index>=strlen(message_1))
+    index%=strlen(message_1);
+
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR, message_1+index);
+  LcdMessage(LINE2_START_ADDR, message_2+index);
+}
+
+void display_incorrect(u8 index){
+  char end_message[] = "Press any button to play again";
+
+  if (index>=strlen(end_message))
+    index%=strlen(end_message);
+
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR, "Incorrect");
+  LcdMessage(LINE2_START_ADDR, end_message+index);
+  //Add what level the user reached
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/*! @publicsection */                                                                                            
+/*! @publicsection */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/*! @protectedsection */                                                                                            
+/*! @protectedsection */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
 /*!--------------------------------------------------------------------------------------------------------------------
@@ -127,21 +140,13 @@ Promises:
 void UserApp1Initialize(void)
 {
   /* If good initialization, set state to Idle */
-  if(1)
+  if (1)
   {
     UserApp1_pfStateMachine = UserApp1SM_Idle;
     HEARTBEAT_OFF();
-    LcdCommand(LCD_CLEAR_CMD);
-    LcdMessage(LINE1_START_ADDR, "BUTTON LOCATIONS");
-    LcdMessage(LINE2_START_ADDR, "0");
-    LcdMessage(LINE2_START_ADDR+6,"1");
-    LcdMessage(LINE2_START_ADDR+13,"2");
-    LcdMessage(LINE2_END_ADDR,"3");
-    
-  
-    //Fill code randomly with the digits 0-3
-    
-    //Code currently not working
+    // Fill code randomly with the digits 0-3
+
+    // Code currently not working
   }
   else
   {
@@ -151,7 +156,6 @@ void UserApp1Initialize(void)
 
 } /* end UserApp1Initialize() */
 
-  
 /*!----------------------------------------------------------------------------------------------------------------------
 @fn void UserApp1RunActiveState(void)
 
@@ -173,28 +177,31 @@ void UserApp1RunActiveState(void)
 
 } /* end UserApp1RunActiveState */
 
-
 /*------------------------------------------------------------------------------------------------------------------*/
-/*! @privatesection */                                                                                            
+/*! @privatesection */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
 
 /**********************************************************************************************************************
 State Machine Function Definitions
 **********************************************************************************************************************/
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* What does this state do? */
-static void UserApp1SM_Idle(void){
+static void UserApp1SM_Idle(void)
+{
   static int inputcode[30];
-  static u16 code_index=0;
-  static u16 user_inputs=0;
+  static u16 user_inputs = 0;
   static u16 counter_period = U16_COUNTER_PERIOD_MS;
-  static u8 level = 8;
-  static u8 game_stage = 1;
-  
+  static u8 display_index = 0;
+  static u8 code_index = 0;
+  static u8 level = 1;
+  static u8 game_stage = 0;
 
-  if(counter_period==500){
-    for(u8 i=0;i<7;i++){
+  static bool guessed_correct = TRUE;
+
+  if (counter_period == 500)
+  {
+    for (u8 i = 0; i < 7; i++)
+    {
       LedOff(i);
     }
     /*
@@ -202,76 +209,147 @@ static void UserApp1SM_Idle(void){
       for(u8 i=0;i<7;i++)
         LedOff(i);
     }*/
-    
-     // counter_period = U16_COUNTER_PERIOD_MS;
-    
+
+    // counter_period = U16_COUNTER_PERIOD_MS;
   }
-  
-  if(counter_period==0){
+
+  if (counter_period == 0)
+  {
 
     counter_period = U16_COUNTER_PERIOD_MS;
 
-    if(game_stage==1){
-      LedOn(code[code_index]);
-      LedOff(code[code_index-1]);
-      code_index++;
-      if(code_index==level)
-        game_stage++;
-        user_inputs = 0;
-    }
-    
-
-    if(game_stage==2){
+    if(game_stage==0){
+      start_message(display_index);
       if(WasButtonPressed(BUTTON0)){
+        ButtonAcknowledge(BUTTON0);
+        game_stage++;
+      }
+
+      else if(WasButtonPressed(BUTTON1)){
+        ButtonAcknowledge(BUTTON1);
+        game_stage++;
+      }
+
+      else if(WasButtonPressed(BUTTON2)){
+        ButtonAcknowledge(BUTTON2);
+        game_stage++;
+      }
+
+      else if(WasButtonPressed(BUTTON3)){
+        ButtonAcknowledge(BUTTON3);
+        game_stage++;
+      }
+
+      display_index++;
+    }
+
+    if (game_stage == 1){ // Display code to user
+      displaying_code(display_index);
+      LedOn(code[code_index]);
+      LedOff(code[code_index - 1]);
+      code_index++;
+      if (code_index == level)
+        game_stage++;
+      display_index = 0;
+      user_inputs = 0;
+    }
+
+    if (game_stage == 2){          //User guesses the code
+      display_button_loc(display_index);
+      if (WasButtonPressed(BUTTON0))
+      {
         ButtonAcknowledge(BUTTON0);
         inputcode[user_inputs] = 0;
         LedOn(0);
         user_inputs++;
       }
 
-      else if(WasButtonPressed(BUTTON1)){
+      else if (WasButtonPressed(BUTTON1))
+      {
         ButtonAcknowledge(BUTTON1);
         inputcode[user_inputs] = 1;
         LedOn(1);
         user_inputs++;
       }
 
-      else if(WasButtonPressed(BUTTON2)){
+      else if (WasButtonPressed(BUTTON2))
+      {
         ButtonAcknowledge(BUTTON2);
         inputcode[user_inputs] = 2;
         LedOn(2);
         user_inputs++;
       }
 
-      else if(WasButtonPressed(BUTTON3)){
+      else if (WasButtonPressed(BUTTON3))
+      {
         ButtonAcknowledge(BUTTON3);
         inputcode[user_inputs] = 3;
         LedOn(3);
         user_inputs++;
       }
 
-      if (user_inputs==level)
+      if (user_inputs == level){
         game_stage++;
+        display_index = 0;
+      }
     }
 
-    if (game_stage==3){
-      for(int index=0;index<level;index++)
-        if(code[index]!=inputcode[index])
+    if (game_stage == 3)
+    {
+      for (int index = 0; index <= level; index++){
+        if (code[index] != inputcode[index]){
           game_stage = 5;
-      
-      //User passed, set game for next level 
+          display_index = 0;
+          guessed_correct = FALSE;
+        }
+      }
+      // User passed, set game for next level
+      game_stage = 4;
       level++;
+      code_index=0;
     }
-  } 
+    
+    if(game_stage==4){
+      display_passed_level(display_index, level);
+      display_index++;
+
+      if(WasButtonPressed(BUTTON0)){
+        ButtonAcknowledge(BUTTON0);
+        game_stage=1;
+      }
+
+      else if(WasButtonPressed(BUTTON1)){
+        ButtonAcknowledge(BUTTON1);
+        game_stage=1;
+      }
+
+      else if(WasButtonPressed(BUTTON2)){
+        ButtonAcknowledge(BUTTON2);
+        game_stage=1;
+      }
+
+      else if(WasButtonPressed(BUTTON3)){
+        ButtonAcknowledge(BUTTON3);
+        game_stage++;
+        display_index=0;
+      }
+
+    }
+
+    if(game_stage==5){
+      display_incorrect(display_index);
+      display_index++;
+    }
+  }
   counter_period--;
 }
- /* end UserApp1SM_Idle() */
-
+/* end UserApp1SM_Idle() */
 
 /*------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
-static void UserApp1SM_Error(void){
-  
+static void UserApp1SM_Error(void)
+{
+
 } /* end UserApp1SM_Error() */
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* End of File                                                                                                        */
