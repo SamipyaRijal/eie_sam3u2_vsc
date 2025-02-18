@@ -196,8 +196,6 @@ static void UserApp1SM_Idle(void)
   static u8 level = 1;
   static u8 game_stage = 0;
 
-  static bool guessed_correct = TRUE;
-
   if (counter_period == 500)
   {
     for (u8 i = 0; i < 7; i++)
@@ -241,10 +239,11 @@ static void UserApp1SM_Idle(void)
       LedOn(code[code_index]);
       LedOff(code[code_index - 1]);
       code_index++;
-      if (code_index == level)
+      if (code_index == level){
         game_stage++;
-      display_index = 0;
-      user_inputs = 0;
+        display_index = 0;
+        user_inputs = 0;
+      }
 
       ButtonAcknowledge(BUTTON0);
       ButtonAcknowledge(BUTTON1);
@@ -256,34 +255,34 @@ static void UserApp1SM_Idle(void)
       display_button_loc(display_index);
       if (WasButtonPressed(BUTTON0))
       {
-        ButtonAcknowledge(BUTTON0);
         inputcode[user_inputs] = 0;
         LedOn(0);
         user_inputs++;
+        ButtonAcknowledge(BUTTON0);
       }
 
       else if (WasButtonPressed(BUTTON1))
       {
-        ButtonAcknowledge(BUTTON1);
         inputcode[user_inputs] = 1;
         LedOn(1);
         user_inputs++;
+        ButtonAcknowledge(BUTTON1);
       }
 
       else if (WasButtonPressed(BUTTON2))
       {
-        ButtonAcknowledge(BUTTON2);
         inputcode[user_inputs] = 2;
         LedOn(2);
         user_inputs++;
+        ButtonAcknowledge(BUTTON2);
       }
 
       else if (WasButtonPressed(BUTTON3))
       {
-        ButtonAcknowledge(BUTTON3);
         inputcode[user_inputs] = 3;
         LedOn(3);
         user_inputs++;
+        ButtonAcknowledge(BUTTON3);
       }
 
       if (user_inputs == level){
@@ -294,15 +293,14 @@ static void UserApp1SM_Idle(void)
 
     if (game_stage == 3)
     {
+      game_stage = 5;
       for (int index = 0; index <= level; index++){
-        if (code[index] != inputcode[index]){
-          game_stage = 5;
+        if (code[index] == inputcode[index]){
+          game_stage = 4;
           display_index = 0;
-          guessed_correct = FALSE;
         }
       }
       // User passed, set game for next level
-      game_stage = 4;
       level++;
       code_index=0;
     }
@@ -314,16 +312,19 @@ static void UserApp1SM_Idle(void)
       if(WasButtonPressed(BUTTON0)){
         ButtonAcknowledge(BUTTON0);
         game_stage=1;
+        display_index=0;
       }
 
       else if(WasButtonPressed(BUTTON1)){
         ButtonAcknowledge(BUTTON1);
         game_stage=1;
+        display_index=0;
       }
 
       else if(WasButtonPressed(BUTTON2)){
         ButtonAcknowledge(BUTTON2);
         game_stage=1;
+        display_index=0;
       }
 
       else if(WasButtonPressed(BUTTON3)){
@@ -337,6 +338,30 @@ static void UserApp1SM_Idle(void)
     if(game_stage==5){
       display_incorrect(display_index);
       display_index++;
+
+      if(WasButtonPressed(BUTTON0)){
+        ButtonAcknowledge(BUTTON0);
+        game_stage=1;
+        level=1;
+      }
+
+      else if(WasButtonPressed(BUTTON1)){
+        ButtonAcknowledge(BUTTON1);
+        game_stage=1;
+        level=1;
+      }
+
+      else if(WasButtonPressed(BUTTON2)){
+        ButtonAcknowledge(BUTTON2);
+        game_stage=1;
+        level=1;
+      }
+
+      else if(WasButtonPressed(BUTTON3)){
+        ButtonAcknowledge(BUTTON3);
+        game_stage=1;
+        level=1;
+      }
     }
   }
   counter_period--;
