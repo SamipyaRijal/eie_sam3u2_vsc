@@ -204,13 +204,6 @@ static void UserApp1SM_Idle(void)
     {
       LedOff(i);
     }
-    /*
-    if(code_displayed){
-      for(u8 i=0;i<7;i++)
-        LedOff(i);
-    }*/
-
-    // counter_period = U16_COUNTER_PERIOD_MS;
   }
 
   if (counter_period == 0)
@@ -252,6 +245,11 @@ static void UserApp1SM_Idle(void)
         game_stage++;
       display_index = 0;
       user_inputs = 0;
+
+      ButtonAcknowledge(BUTTON0);
+      ButtonAcknowledge(BUTTON1);
+      ButtonAcknowledge(BUTTON2);
+      ButtonAcknowledge(BUTTON3);
     }
 
     if (game_stage == 2){          //User guesses the code
