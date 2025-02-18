@@ -66,6 +66,7 @@ static fnCode_type UserApp1_pfStateMachine; /*!< @brief The state machine functi
 Function Definitions
 **********************************************************************************************************************/
 
+
 void start_message(int index){
   LcdCommand(LCD_CLEAR_CMD);
   char message[] = "Press any button to begin playing";
@@ -196,12 +197,16 @@ static void UserApp1SM_Idle(void)
   static u8 level = 1;
   static u8 game_stage = 0;
 
+  PWMAudioSetFrequency(BUZZER1,500);
+  PWMAudioSetFrequency(BUZZER2,100);
+
   if (counter_period == 500)
   {
     for (u8 i = 0; i < 7; i++)
     {
       LedOff(i);
     }
+    PWMAudioOff(BUZZER1);
   }
 
   if (counter_period == 0)
@@ -214,27 +219,31 @@ static void UserApp1SM_Idle(void)
       if(WasButtonPressed(BUTTON0)){
         ButtonAcknowledge(BUTTON0);
         game_stage++;
+        PWMAudioOn(BUZZER1);
       }
 
       else if(WasButtonPressed(BUTTON1)){
         ButtonAcknowledge(BUTTON1);
         game_stage++;
+        PWMAudioOn(BUZZER1);
       }
 
       else if(WasButtonPressed(BUTTON2)){
         ButtonAcknowledge(BUTTON2);
         game_stage++;
+        PWMAudioOn(BUZZER1);
       }
 
       else if(WasButtonPressed(BUTTON3)){
         ButtonAcknowledge(BUTTON3);
         game_stage++;
+        PWMAudioOn(BUZZER1);
       }
 
       display_index++;
     }
 
-    if (game_stage == 1){ // Display code to user
+    else if (game_stage == 1){ // Display code to user
       displaying_code(display_index);
       LedOn(code[code_index]);
       LedOff(code[code_index - 1]);
@@ -251,7 +260,7 @@ static void UserApp1SM_Idle(void)
       ButtonAcknowledge(BUTTON3);
     }
 
-    if (game_stage == 2){          //User guesses the code
+    else if (game_stage == 2){          //User guesses the code
       display_button_loc(display_index);
       if (WasButtonPressed(BUTTON0))
       {
@@ -259,6 +268,7 @@ static void UserApp1SM_Idle(void)
         LedOn(0);
         user_inputs++;
         ButtonAcknowledge(BUTTON0);
+        PWMAudioOn(BUZZER1);
       }
 
       else if (WasButtonPressed(BUTTON1))
@@ -267,6 +277,7 @@ static void UserApp1SM_Idle(void)
         LedOn(1);
         user_inputs++;
         ButtonAcknowledge(BUTTON1);
+        PWMAudioOn(BUZZER1);
       }
 
       else if (WasButtonPressed(BUTTON2))
@@ -275,6 +286,7 @@ static void UserApp1SM_Idle(void)
         LedOn(2);
         user_inputs++;
         ButtonAcknowledge(BUTTON2);
+        PWMAudioOn(BUZZER1);
       }
 
       else if (WasButtonPressed(BUTTON3))
@@ -283,6 +295,7 @@ static void UserApp1SM_Idle(void)
         LedOn(3);
         user_inputs++;
         ButtonAcknowledge(BUTTON3);
+        PWMAudioOn(BUZZER1);
       }
 
       if (user_inputs == level){
@@ -291,12 +304,12 @@ static void UserApp1SM_Idle(void)
       }
     }
 
-    if (game_stage == 3)
+    else if (game_stage == 3)
     {
-      game_stage = 5;
-      for (int index = 0; index <= level; index++){
-        if (code[index] == inputcode[index]){
-          game_stage = 4;
+      game_stage = 4;
+      for (int index = 0; index < level; index++){
+        if (code[index] != inputcode[index]){
+          game_stage = 5;
           display_index = 0;
         }
       }
@@ -305,7 +318,7 @@ static void UserApp1SM_Idle(void)
       code_index=0;
     }
     
-    if(game_stage==4){
+    else if(game_stage==4){
       display_passed_level(display_index, level);
       display_index++;
 
@@ -313,29 +326,46 @@ static void UserApp1SM_Idle(void)
         ButtonAcknowledge(BUTTON0);
         game_stage=1;
         display_index=0;
+        PWMAudioOn(BUZZER1);
       }
 
       else if(WasButtonPressed(BUTTON1)){
         ButtonAcknowledge(BUTTON1);
         game_stage=1;
         display_index=0;
+        PWMAudioOn(BUZZER1);
       }
 
       else if(WasButtonPressed(BUTTON2)){
         ButtonAcknowledge(BUTTON2);
         game_stage=1;
         display_index=0;
+        PWMAudioOn(BUZZER1);
       }
 
       else if(WasButtonPressed(BUTTON3)){
         ButtonAcknowledge(BUTTON3);
         game_stage++;
         display_index=0;
+        PWMAudioOn(BUZZER1);
       }
 
     }
 
-    if(game_stage==5){
+    else if(game_stage==5){
+      PWMAudioOff(BUZZER1);
+      PWMAudioOn(BUZZER2);
+      counter_period = 3000;
+      game_stage++;
+    }
+
+    else if(game_stage==6){
+      ButtonAcknowledge(BUTTON0);
+      ButtonAcknowledge(BUTTON1);
+      ButtonAcknowledge(BUTTON2);
+      ButtonAcknowledge(BUTTON3);
+      
+      PWMAudioOff(BUZZER2);
       display_incorrect(display_index);
       display_index++;
 
@@ -364,6 +394,7 @@ static void UserApp1SM_Idle(void)
       }
     }
   }
+
   counter_period--;
 }
 /* end UserApp1SM_Idle() */
