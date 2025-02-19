@@ -56,7 +56,7 @@ static void UserApp1SM_Error(void);
 Constants / Definitions
 **********************************************************************************************************************/
 #define U16_COUNTER_PERIOD_MS 1000;
-#define MAX_LEVEL 30
+#define MAX_LEVEL 10
 
 #endif /* __USER_APP1_H */
 

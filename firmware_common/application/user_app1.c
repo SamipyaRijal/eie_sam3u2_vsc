@@ -113,19 +113,26 @@ void display_passed_level(u8 index, u8 level){
 }
 
 void display_incorrect(u8 index){
-  char end_message[] = "Press any button to play again";
+  char end_message1[] = "You reached level"; // check if adding level the user reached is possible
+  char end_message2[] = "Press any button to play again";
 
-  if (index>=strlen(end_message))
-    index%=strlen(end_message);
+  if (index>=strlen(end_message2))
+    index%=strlen(end_message2);
 
   LcdCommand(LCD_CLEAR_CMD);
-  LcdMessage(LINE1_START_ADDR, "Incorrect");
-  LcdMessage(LINE2_START_ADDR, end_message+index);
-  //Add what level the user reached
+  LcdMessage(LINE1_START_ADDR, end_message1+index);
+  LcdMessage(LINE2_START_ADDR, end_message2+index);
 }
 
 void display_max_level(u8 index){
-  char message1[] = "Congrats you reached the max level";
+  char message1[] = "Congrats you reached the max level of"; //check if adding max level to message is possible
+  char message2[] = "Press any button to play again";
+
+  if (index>=strlen(message1))
+    index%=strlen(message1);
+
+  LcdMessage(LINE1_START_ADDR, message1+index);
+  LcdMessage(LINE2_START_ADDR, message2+index);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -161,7 +168,7 @@ void UserApp1Initialize(void)
     // Fill code randomly with the digits 0-3
     update_random_seed(G_u32SystemTime1ms);
     for(u8 i=0;i<MAX_LEVEL;i++)
-      code[i+1]=(random()&0x3)*2;
+      code[i]=(random()&0x3)*2;
     // Code currently not working
   }
   else
@@ -414,10 +421,43 @@ static void UserApp1SM_Idle(void)
       }
     }
 
-    else if(game_stage=7){
+    else if(game_stage==7){
       display_max_level(display_index);
+      display_index++;
       for(u8 index=0;index<MAX_LEVEL;index++)
         code[index]=(random()&0x3)*2;
+
+      if(WasButtonPressed(BUTTON0)){
+        ButtonAcknowledge(BUTTON0);
+        PWMAudioOn(BUZZER1);
+        game_stage=1;
+        level=1;
+        display_index=0;
+      }
+
+      else if(WasButtonPressed(BUTTON1)){
+        ButtonAcknowledge(BUTTON1);
+        PWMAudioOn(BUZZER1);
+        game_stage=1;
+        level=1;
+        display_index=0;
+      }
+
+      else if(WasButtonPressed(BUTTON2)){
+        ButtonAcknowledge(BUTTON2);
+        PWMAudioOn(BUZZER1);
+        game_stage=1;
+        level=1;
+        display_index=0;
+      }
+
+      else if(WasButtonPressed(BUTTON3)){
+        ButtonAcknowledge(BUTTON3);
+        PWMAudioOn(BUZZER1);
+        game_stage=1;
+        level=1;
+        display_index=0;
+      }
     }
   }
 
