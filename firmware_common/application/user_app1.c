@@ -38,7 +38,6 @@ PROTECTED FUNCTIONS
 **********************************************************************************************************************/
 
 #include "configuration.h"
-#include <stdlib.h>
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
@@ -46,7 +45,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags; /*!< @brief Global state flags */
-static int code[30] = {0, 1, 2, 3, 2, 2, 3, 1, 2};
+static int code[MAX_LEVEL];
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -66,6 +65,16 @@ static fnCode_type UserApp1_pfStateMachine; /*!< @brief The state machine functi
 Function Definitions
 **********************************************************************************************************************/
 
+static u32 rand_seed = 123456789; // initial seed value
+
+void update_rand_seed(u32 new_seed){
+  rand_seed = new_seed;
+}
+
+int rand(void) {
+    rand_seed = rand_seed * 1664525 + 1013904223; // LCG formula
+    return (rand_seed >> 16) & 0x7FFF; // Return a 15-bit number
+}
 
 void start_message(int index){
   LcdCommand(LCD_CLEAR_CMD);
@@ -115,6 +124,10 @@ void display_incorrect(u8 index){
   //Add what level the user reached
 }
 
+void display_max_level(u8 index){
+  char message1[] = "Congrats you reached the max level";
+}
+
 /*--------------------------------------------------------------------------------------------------------------------*/
 /*! @publicsection */
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -146,7 +159,9 @@ void UserApp1Initialize(void)
     UserApp1_pfStateMachine = UserApp1SM_Idle;
     HEARTBEAT_OFF();
     // Fill code randomly with the digits 0-3
-
+    update_rand_seed(G_u32SystemTime1ms);
+    for(u8 i=0;i<MAX_LEVEL;i++)
+      code[i+1]=(rand()&0x3)*2;
     // Code currently not working
   }
   else
@@ -246,7 +261,6 @@ static void UserApp1SM_Idle(void)
     else if (game_stage == 1){ // Display code to user
       displaying_code(display_index);
       LedOn(code[code_index]);
-      LedOff(code[code_index - 1]);
       code_index++;
       if (code_index == level){
         game_stage++;
@@ -273,8 +287,8 @@ static void UserApp1SM_Idle(void)
 
       else if (WasButtonPressed(BUTTON1))
       {
-        inputcode[user_inputs] = 1;
-        LedOn(1);
+        inputcode[user_inputs] = 2;
+        LedOn(2);
         user_inputs++;
         ButtonAcknowledge(BUTTON1);
         PWMAudioOn(BUZZER1);
@@ -282,8 +296,8 @@ static void UserApp1SM_Idle(void)
 
       else if (WasButtonPressed(BUTTON2))
       {
-        inputcode[user_inputs] = 2;
-        LedOn(2);
+        inputcode[user_inputs] = 4;
+        LedOn(4);
         user_inputs++;
         ButtonAcknowledge(BUTTON2);
         PWMAudioOn(BUZZER1);
@@ -291,8 +305,8 @@ static void UserApp1SM_Idle(void)
 
       else if (WasButtonPressed(BUTTON3))
       {
-        inputcode[user_inputs] = 3;
-        LedOn(3);
+        inputcode[user_inputs] = 6;
+        LedOn(6);
         user_inputs++;
         ButtonAcknowledge(BUTTON3);
         PWMAudioOn(BUZZER1);
@@ -345,7 +359,7 @@ static void UserApp1SM_Idle(void)
 
       else if(WasButtonPressed(BUTTON3)){
         ButtonAcknowledge(BUTTON3);
-        game_stage++;
+        game_stage=1;
         display_index=0;
         PWMAudioOn(BUZZER1);
       }
@@ -356,6 +370,8 @@ static void UserApp1SM_Idle(void)
       PWMAudioOff(BUZZER1);
       PWMAudioOn(BUZZER2);
       counter_period = 3000;
+      for(u8 index=0;index<MAX_LEVEL;index++)
+        code[index]=(rand()&0x3)*2;
       game_stage++;
     }
 
