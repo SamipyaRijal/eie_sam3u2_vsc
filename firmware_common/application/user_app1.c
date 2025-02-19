@@ -65,15 +65,15 @@ static fnCode_type UserApp1_pfStateMachine; /*!< @brief The state machine functi
 Function Definitions
 **********************************************************************************************************************/
 
-static u32 rand_seed = 123456789; // initial seed value
+static u32 random_seed = 123456789; // initial seed value
 
-void update_rand_seed(u32 new_seed){
-  rand_seed = new_seed;
+void update_random_seed(u32 new_seed){
+  random_seed = new_seed;
 }
 
-int rand(void) {
-    rand_seed = rand_seed * 1664525 + 1013904223; // LCG formula
-    return (rand_seed >> 16) & 0x7FFF; // Return a 15-bit number
+int random(void) {
+    random_seed = random_seed * 1664525 + 1013904223; // LCG formula
+    return (random_seed >> 16) & 0x7FFF; // Return a 15-bit number
 }
 
 void start_message(int index){
@@ -159,9 +159,9 @@ void UserApp1Initialize(void)
     UserApp1_pfStateMachine = UserApp1SM_Idle;
     HEARTBEAT_OFF();
     // Fill code randomly with the digits 0-3
-    update_rand_seed(G_u32SystemTime1ms);
+    update_random_seed(G_u32SystemTime1ms);
     for(u8 i=0;i<MAX_LEVEL;i++)
-      code[i+1]=(rand()&0x3)*2;
+      code[i+1]=(random()&0x3)*2;
     // Code currently not working
   }
   else
@@ -328,6 +328,10 @@ static void UserApp1SM_Idle(void)
         }
       }
       // User passed, set game for next level
+      if(game_stage==4&&level==MAX_LEVEL){
+        game_stage=7;
+        display_index=0;
+      }
       level++;
       code_index=0;
     }
@@ -371,7 +375,7 @@ static void UserApp1SM_Idle(void)
       PWMAudioOn(BUZZER2);
       counter_period = 3000;
       for(u8 index=0;index<MAX_LEVEL;index++)
-        code[index]=(rand()&0x3)*2;
+        code[index]=(random()&0x3)*2;
       game_stage++;
     }
 
@@ -408,6 +412,12 @@ static void UserApp1SM_Idle(void)
         game_stage=1;
         level=1;
       }
+    }
+
+    else if(game_stage=7){
+      display_max_level(display_index);
+      for(u8 index=0;index<MAX_LEVEL;index++)
+        code[index]=(random()&0x3)*2;
     }
   }
 
