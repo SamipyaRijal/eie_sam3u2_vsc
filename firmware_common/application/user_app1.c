@@ -46,6 +46,7 @@ All Global variable names shall start with "G_<type>UserApp1"
 /* New variables */
 volatile u32 G_u32UserApp1Flags; /*!< @brief Global state flags */
 static int code[MAX_LEVEL];
+static u32 random_seed = 123456789; // initial seed value
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -65,7 +66,67 @@ static fnCode_type UserApp1_pfStateMachine; /*!< @brief The state machine functi
 Function Definitions
 **********************************************************************************************************************/
 
-static u32 random_seed = 123456789; // initial seed value
+
+void back_light_colour(int colour_num){
+  switch (colour_num){
+    case 0:
+      LedOn(LCD_BLUE);
+      LedOn(LCD_GREEN);
+      LedOn(LCD_RED);
+      break;
+  
+    case 1:
+      LedOff(LCD_BLUE);
+      LedOn(LCD_GREEN);
+      LedOn(LCD_RED);
+      break;
+
+    case 2:
+      LedOn(LCD_BLUE);
+      LedOff(LCD_GREEN);
+      LedOn(LCD_RED);
+      break;
+
+    case 3:
+      LedOn(LCD_BLUE);
+      LedOn(LCD_GREEN);
+      LedOff(LCD_RED);
+      break;
+
+    case 4:
+      LedOff(LCD_BLUE);
+      LedOff(LCD_GREEN);
+      LedOn(LCD_RED);
+      break;
+
+    case 5:
+      LedOff(LCD_BLUE);
+      LedOn(LCD_GREEN);
+      LedOff(LCD_RED);
+      break;
+  
+    case 6:
+      LedOn(LCD_BLUE);
+      LedOff(LCD_GREEN);
+      LedOff(LCD_RED);
+      break;
+  
+    case 7:
+      LedOff(LCD_BLUE);
+      LedOff(LCD_GREEN);
+      LedOn(LCD_RED);
+      break;
+    
+    case 8:
+      LedOff(LCD_BLUE);
+      LedOff(LCD_GREEN);
+      LedOff(LCD_RED);
+      break;
+
+    default:
+      break;
+  }
+}
 
 void update_random_seed(u32 new_seed){
   random_seed = new_seed;
@@ -94,10 +155,10 @@ void displaying_code(u8 index)
 void display_button_loc(u8 index){
   LcdCommand(LCD_CLEAR_CMD);
   LcdMessage(LINE1_START_ADDR, "BUTTON LOCATIONS");
-  LcdMessage(LINE2_START_ADDR, "0");
-  LcdMessage(LINE2_START_ADDR + 6, "1");
-  LcdMessage(LINE2_START_ADDR + 13, "2");
-  LcdMessage(LINE2_END_ADDR, "3");
+  LcdMessage(LINE2_START_ADDR, "1");
+  LcdMessage(LINE2_START_ADDR + 6, "2");
+  LcdMessage(LINE2_START_ADDR + 13, "3");
+  LcdMessage(LINE2_END_ADDR, "4");
 }
 
 void display_passed_level(u8 index, u8 level){
@@ -214,6 +275,7 @@ static void UserApp1SM_Idle(void)
   static int inputcode[30];
   static u16 user_inputs = 0;
   static u16 counter_period = U16_COUNTER_PERIOD_MS;
+  static u8 backlight_index=0;
   static u8 display_index = 0;
   static u8 code_index = 0;
   static u8 level = 1;
@@ -426,6 +488,12 @@ static void UserApp1SM_Idle(void)
       display_index++;
       for(u8 index=0;index<MAX_LEVEL;index++)
         code[index]=(random()&0x3)*2;
+      
+      if(backlight_index==8)
+        backlight_index=0;
+
+      back_light_colour(backlight_index);
+      backlight_index++;
 
       if(WasButtonPressed(BUTTON0)){
         ButtonAcknowledge(BUTTON0);
@@ -433,6 +501,7 @@ static void UserApp1SM_Idle(void)
         game_stage=1;
         level=1;
         display_index=0;
+        back_light_colour(0);
       }
 
       else if(WasButtonPressed(BUTTON1)){
@@ -441,6 +510,7 @@ static void UserApp1SM_Idle(void)
         game_stage=1;
         level=1;
         display_index=0;
+        back_light_colour(0);
       }
 
       else if(WasButtonPressed(BUTTON2)){
@@ -449,6 +519,7 @@ static void UserApp1SM_Idle(void)
         game_stage=1;
         level=1;
         display_index=0;
+        back_light_colour(0);
       }
 
       else if(WasButtonPressed(BUTTON3)){
@@ -457,6 +528,7 @@ static void UserApp1SM_Idle(void)
         game_stage=1;
         level=1;
         display_index=0;
+        back_light_colour(0);
       }
     }
   }
