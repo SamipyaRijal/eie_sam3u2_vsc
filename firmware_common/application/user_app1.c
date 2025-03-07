@@ -162,20 +162,20 @@ void display_button_loc(u8 index){
 }
 
 void display_passed_level(u8 index, u8 level){
-  char message_1[] = "Congrats you guess correctly";
-  char message_2[] = "Press any button to continue";
+  char message_1[31] = "Congrats you guessed correctly";    //Ensure that both messages are the same length
+  char message_2[31] = "Press any button to continue";
 
   if (index>=strlen(message_1))
     index%=strlen(message_1);
 
   LcdCommand(LCD_CLEAR_CMD);
-  LcdMessage(LINE1_START_ADDR, message_1+index);
+  LcdMessage(LINE1_START_ADDR, message_1+index);            
   LcdMessage(LINE2_START_ADDR, message_2+index);
 }
 
 void display_incorrect(u8 index){
-  char end_message1[] = "You reached level"; // check if adding level the user reached is possible
-  char end_message2[] = "Press any button to play again";
+  char end_message1[31] = "Incorrect"; // check if adding level the user reached is possible
+  char end_message2[31] = "Press any button to play again"; //Ensure that both messages are the same length
 
   if (index>=strlen(end_message2))
     index%=strlen(end_message2);
@@ -186,14 +186,24 @@ void display_incorrect(u8 index){
 }
 
 void display_max_level(u8 index){
-  char message1[] = "Congrats you reached the max level of"; //check if adding max level to message is possible
-  char message2[] = "Press any button to play again";
+  char level_buffer[LEVEL_BUFFER];
+  level_buffer[1] = MAX_LEVEL/10;
+  level_buffer[0] = MAX_LEVEL%10;
 
-  if (index>=strlen(message1))
-    index%=strlen(message1);
+  u8 index1=index;
+  u8 index2=index;
 
-  LcdMessage(LINE1_START_ADDR, message1+index);
-  LcdMessage(LINE2_START_ADDR, message2+index);
+  char message1[] = "Congrats you reached the max level of "; //check if adding max level to message is possible
+  char message2[] = "Press any button to play again";     //Ensure that both messages are the same length
+  
+  if(index1>=strlen(message1))
+    index1%=strlen(message1);
+
+  if(index2>=strlen(message2))
+    index2%=strlen(message2);
+
+  LcdMessage(LINE1_START_ADDR, message1+index1);
+  LcdMessage(LINE2_START_ADDR, message2+index2);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
