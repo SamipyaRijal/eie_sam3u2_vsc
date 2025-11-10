@@ -56,7 +56,8 @@ static void UserApp1SM_Error(void);
 Constants / Definitions
 **********************************************************************************************************************/
 #define U16_COUNTER_PERIOD_MS 1000;
-#define MAX_LEVEL 10
+#define MAX_LEVEL 1
+#define LEVEL_BUFFER 4    //Buffer that converts level to integer
 
 #endif /* __USER_APP1_H */
 

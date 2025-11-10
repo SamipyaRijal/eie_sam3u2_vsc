@@ -38,6 +38,7 @@ PROTECTED FUNCTIONS
 **********************************************************************************************************************/
 
 #include "configuration.h"
+#include <stdio.h>
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
@@ -140,16 +141,30 @@ int random(void) {
 void start_message(int index){
   LcdCommand(LCD_CLEAR_CMD);
   char message[] = "Press any button to begin playing";
-  if (index==strlen(message))
+
+  if (index>=strlen(message))
     index%=strlen(message);
+  
   LcdMessage(LINE1_START_ADDR,message+index);
 
 }
 
-void displaying_code(u8 index)
+void displaying_code(u8 index, u8 level)
 {
   LcdCommand(LCD_CLEAR_CMD);
+
+
+  char level_buffer[LEVEL_BUFFER];
+  sprintf(level_buffer, "%u", level);
+  
+  
+  char message1[10] = "Level:";
+
+  strcat(message1,level_buffer);
+
   LcdMessage(LINE1_START_ADDR, "Displaying code");
+  LcdMessage(LINE2_START_ADDR, message1);
+
 }
 
 void display_button_loc(u8 index){
@@ -162,45 +177,59 @@ void display_button_loc(u8 index){
 }
 
 void display_passed_level(u8 index, u8 level){
-  char message_1[31] = "Congrats you guessed correctly";    //Ensure that both messages are the same length
-  char message_2[31] = "Press any button to continue";
+  char message_1[] = "Congrats you guessed correctly";
+  char message_2[] = "Press any button to continue";
 
-  if (index>=strlen(message_1))
-    index%=strlen(message_1);
+  u8 index1 = index;
+  u8 index2 = index;
+
+  if (index1>=strlen(message_1))
+    index1%=strlen(message_1);
+  
+  if(index2>=strlen(message_2))
+    index2%=strlen(message_2);
 
   LcdCommand(LCD_CLEAR_CMD);
-  LcdMessage(LINE1_START_ADDR, message_1+index);            
-  LcdMessage(LINE2_START_ADDR, message_2+index);
+  LcdMessage(LINE1_START_ADDR, message_1+index1);            
+  LcdMessage(LINE2_START_ADDR, message_2+index2);
 }
 
 void display_incorrect(u8 index){
-  char end_message1[31] = "Incorrect"; // check if adding level the user reached is possible
-  char end_message2[31] = "Press any button to play again"; //Ensure that both messages are the same length
-
-  if (index>=strlen(end_message2))
-    index%=strlen(end_message2);
-
-  LcdCommand(LCD_CLEAR_CMD);
-  LcdMessage(LINE1_START_ADDR, end_message1+index);
-  LcdMessage(LINE2_START_ADDR, end_message2+index);
-}
-
-void display_max_level(u8 index){
-  char level_buffer[LEVEL_BUFFER];
-  level_buffer[1] = MAX_LEVEL/10;
-  level_buffer[0] = MAX_LEVEL%10;
+  char end_message1[] = "Incorrect"; // check if adding level the user reached is possible
+  char end_message2[] = "Press any button to play again"; //Ensure that both messages are the same length
 
   u8 index1=index;
   u8 index2=index;
 
-  char message1[] = "Congrats you reached the max level of "; //check if adding max level to message is possible
-  char message2[] = "Press any button to play again";     //Ensure that both messages are the same length
-  
-  if(index1>=strlen(message1))
-    index1%=strlen(message1);
+  if(index1>=strlen(end_message1))
+    index1%=strlen(end_message1);
 
-  if(index2>=strlen(message2))
-    index2%=strlen(message2);
+  if (index2>=strlen(end_message2))
+    index2%=strlen(end_message2);
+
+  LcdCommand(LCD_CLEAR_CMD);
+  LcdMessage(LINE1_START_ADDR, end_message1+index1);
+  LcdMessage(LINE2_START_ADDR, end_message2+index2);
+}
+
+void display_max_level(u8 index){
+  u8 index1=index;
+  u8 index2=index;
+
+  u8 arr1 = MAX_LEVEL;
+  char level_buffer[LEVEL_BUFFER];
+  sprintf(level_buffer, "%u", MAX_LEVEL);
+
+  char message1[42] = "Congrats you reached the max level of "; //check if adding max level to message is possible
+  char message2[] = "Press any button to play again";     //Ensure that both messages are the same length
+
+  strcat(message1, level_buffer);
+  
+  if(index1>=(strlen(message1)-19))
+    index1%=(strlen(message1)-19);
+
+  if(index2>=(strlen(message2)-19))
+    index2%=(strlen(message2)-19);
 
   LcdMessage(LINE1_START_ADDR, message1+index1);
   LcdMessage(LINE2_START_ADDR, message2+index2);
@@ -338,7 +367,7 @@ static void UserApp1SM_Idle(void)
     }
 
     else if (game_stage == 1){ // Display code to user
-      displaying_code(display_index);
+      displaying_code(display_index, level);
       LedOn(code[code_index]);
       code_index++;
       if (code_index == level){
